@@ -462,12 +462,12 @@
             <!-- 5. Names & Date Header Row -->
             <tr class="names-date-header">
                 <td class="text-start ps-3 sticky-col">பெயர் \ தேதி</td>
-                <td><input type="date" id="date_0" class="date-picker-input"></td>
-                <td><input type="date" id="date_1" class="date-picker-input"></td>
-                <td><input type="date" id="date_2" class="date-picker-input"></td>
-                <td><input type="date" id="date_3" class="date-picker-input"></td>
-                <td><input type="date" id="date_4" class="date-picker-input"></td>
-                <td><input type="date" id="date_5" class="date-picker-input"></td>
+                <td><input type="date" id="date_0" class="date-picker-input" onchange="saveCurrentSessionDraft()"></td>
+                <td><input type="date" id="date_1" class="date-picker-input" onchange="saveCurrentSessionDraft()"></td>
+                <td><input type="date" id="date_2" class="date-picker-input" onchange="saveCurrentSessionDraft()"></td>
+                <td><input type="date" id="date_3" class="date-picker-input" onchange="saveCurrentSessionDraft()"></td>
+                <td><input type="date" id="date_4" class="date-picker-input" onchange="saveCurrentSessionDraft()"></td>
+                <td><input type="date" id="date_5" class="date-picker-input" onchange="saveCurrentSessionDraft()"></td>
                 <td style="color: #93c5fd;">வார சம்பளம்</td>
                 <td style="color: #fca5a5;">அட்வான்ஸ்</td>
                 <td class="pf-column-cell" style="color: #e9d5ff;">PF பிடித்தம்</td>
@@ -553,36 +553,93 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    /* Unsaved Changes & Back/Refresh Prevention */
-    let isFormDirty = false;
+    /* ==========================================================================
+       BULLETPROOF HARDWARE & GESTURE BACK TRAP FOR MOBILE BROWSERS
+       ========================================================================== */
 
-    function markDirty() {
-        isFormDirty = true;
+    let isBackTrapActive = false;
+
+    function primeHistoryStack() {
+        if (!isBackTrapActive) {
+            isBackTrapActive = true;
+            // Push 10 identical states so swipe/back cannot escape in a single pop
+            for (let i = 0; i < 10; i++) {
+                window.history.pushState({ trapLevel: i }, document.title, window.location.href);
+            }
+        }
     }
 
-    // Warn before Refresh, Tab Close, or Navigation
-    window.addEventListener("beforeunload", function (e) {
-        if (isFormDirty) {
-            e.preventDefault();
-            e.returnValue = "கணக்கு விவரங்கள் அழியக்கூடும்! பக்கத்தை விட்டு வெளியேறவா?";
-            return e.returnValue;
+    // Prime the stack immediately and also upon the very first user interaction
+    window.addEventListener('load', primeHistoryStack);
+    document.addEventListener('touchstart', primeHistoryStack, { once: true, passive: true });
+    document.addEventListener('click', primeHistoryStack, { once: true, passive: true });
+
+    // Listen for Back Button / Swipe-back triggers
+    window.addEventListener('popstate', function (e) {
+        const wantToExit = window.confirm("⚠️ எச்சரிக்கை!\n\nபக்கத்தை விட்டு வெளியேறினால் நீங்கள் உள்ளிட்ட கணக்கு விவரங்கள் அழியக்கூடும்.\n\nவெளியேற விரும்புகிறீர்களா?");
+        if (wantToExit) {
+            // User confirmed exit: unwind history
+            window.removeEventListener('beforeunload', beforeUnloadHandler);
+            window.history.go(-20);
+        } else {
+            // User cancelled: refill history stack immediately
+            for (let i = 0; i < 5; i++) {
+                window.history.pushState({ trapLevel: i }, document.title, window.location.href);
+            }
         }
     });
 
-    // Mobile Hardware Back Button Trap
-    history.pushState(null, null, location.href);
-    window.addEventListener('popstate', function () {
-        if (isFormDirty) {
-            const leave = confirm("⚠️ நீங்கள் உள்ளிட்ட கணக்கு விவரங்கள் அழியக்கூடும்! வெளியேற விரும்புகிறீர்களா?");
-            if (leave) {
-                history.back();
-            } else {
-                history.pushState(null, null, location.href);
+    // Desktop Tab Close / Reload Guard
+    function beforeUnloadHandler(e) {
+        e.preventDefault();
+        e.returnValue = "கணக்கு விவரங்கள் அழியக்கூடும்! பக்கத்தை விட்டு வெளியேறவா?";
+        return e.returnValue;
+    }
+    window.addEventListener("beforeunload", beforeUnloadHandler);
+
+    /* ==========================================================================
+       AUTO-SAVE & RECOVERY DRAFT ENGINE
+       ========================================================================== */
+
+    function saveCurrentSessionDraft() {
+        syncCurrentState();
+        const draft = {
+            workerData: workerData,
+            isPfActive: isPfActive,
+            cfgSizeRate: document.getElementById("cfgSizeRate").value,
+            cfgStraightRate: document.getElementById("cfgStraightRate").value,
+            sizes: [0,1,2,3,4,5].map(d => document.getElementById(`size_${d}`).value),
+            strs: [0,1,2,3,4,5].map(d => document.getElementById(`str_${d}`).value),
+            labours: [0,1,2,3,4,5].map(d => document.getElementById(`labour_${d}`).value),
+            dates: [0,1,2,3,4,5].map(d => document.getElementById(`date_${d}`).value)
+        };
+        sessionStorage.setItem('current_wage_session_draft', JSON.stringify(draft));
+    }
+
+    function loadSessionDraft() {
+        const savedDraft = sessionStorage.getItem('current_wage_session_draft');
+        if (savedDraft) {
+            try {
+                const draft = JSON.parse(savedDraft);
+                if (draft.workerData) workerData = draft.workerData;
+                if (draft.isPfActive !== undefined) {
+                    isPfActive = draft.isPfActive;
+                    document.getElementById("globalPfToggle").checked = isPfActive;
+                    const table = document.getElementById("mainWageTable");
+                    if (isPfActive) table.classList.add("pf-active");
+                    else table.classList.remove("pf-active");
+                }
+                if (draft.cfgSizeRate) document.getElementById("cfgSizeRate").value = draft.cfgSizeRate;
+                if (draft.cfgStraightRate) document.getElementById("cfgStraightRate").value = draft.cfgStraightRate;
+                if (draft.sizes) draft.sizes.forEach((v, i) => document.getElementById(`size_${i}`).value = v);
+                if (draft.strs) draft.strs.forEach((v, i) => document.getElementById(`str_${i}`).value = v);
+                if (draft.labours) draft.labours.forEach((v, i) => document.getElementById(`labour_${i}`).value = v);
+                if (draft.dates) draft.dates.forEach((v, i) => document.getElementById(`date_${i}`).value = v);
+            } catch(e) {
+                console.error("Draft recovery error", e);
             }
-        } else {
-            history.back();
         }
-    });
+    }
 
     function handleEnterKey(event, element) {
         if (event.key === "Enter") {
@@ -628,7 +685,6 @@
     }
 
     function toggleGlobalPf(enabled) {
-        markDirty();
         isPfActive = enabled;
         const table = document.getElementById("mainWageTable");
         if (isPfActive) {
@@ -642,6 +698,7 @@
             });
         }
         calcSheet();
+        saveCurrentSessionDraft();
     }
 
     function renderTable() {
@@ -680,10 +737,10 @@
                 </td>
                 ${dayCells}
                 <td id="gross_${rIdx}" class="col-gross">-</td>
-                <td class="col-adv"><input type="number" id="adv_${rIdx}" value="${worker.adv || 0}" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+                <td class="col-adv"><input type="number" id="adv_${rIdx}" value="${worker.adv || 0}" oninput="calcSheet(); saveCurrentSessionDraft();" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
 
                 <td class="col-pf pf-column-cell">
-                    <input type="number" id="pf_amt_${rIdx}" value="${worker.pfAmt || 0}" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)">
+                    <input type="number" id="pf_amt_${rIdx}" value="${worker.pfAmt || 0}" oninput="calcSheet(); saveCurrentSessionDraft();" onfocus="this.select()" onkeydown="handleEnterKey(event, this)">
                 </td>
 
                 <td id="bal_${rIdx}" class="col-bal">-</td>
@@ -715,12 +772,12 @@
                 tr.classList.remove("drag-over");
                 const targetIndex = parseInt(tr.dataset.index);
                 if (draggedRowIndex !== null && draggedRowIndex !== targetIndex) {
-                    markDirty();
                     syncCurrentState();
                     const movedItem = workerData.splice(draggedRowIndex, 1)[0];
                     workerData.splice(targetIndex, 0, movedItem);
                     saveNamesPermanently();
                     renderTable();
+                    saveCurrentSessionDraft();
                 }
             });
 
@@ -731,21 +788,21 @@
     }
 
     function handleCheckboxChange(rIdx, d) {
-        markDirty();
         calcSheet();
+        saveCurrentSessionDraft();
     }
 
     function setDeductTon(rIdx, dIdx) {
         const current = workerData[rIdx].deductTons[dIdx] || 0;
         const input = prompt(`${workerData[rIdx].name} அவர்களுக்கு Day ${dIdx+1}-ல் எத்தனை டன் கழிக்க வேண்டும்?`, current);
         if (input !== null) {
-            markDirty();
             workerData[rIdx].deductTons[dIdx] = parseFloat(input) || 0;
             if (workerData[rIdx].deductTons[dIdx] > 0) {
                 const chk = document.getElementById(`chk_${rIdx}_${dIdx}`);
                 if (chk) chk.checked = true;
             }
             calcSheet();
+            saveCurrentSessionDraft();
         }
     }
 
@@ -764,9 +821,9 @@
     }
 
     function updateName(idx, newName) {
-        markDirty();
         workerData[idx].name = newName;
         saveNamesPermanently();
+        saveCurrentSessionDraft();
     }
 
     function openAddWorkerModal() {
@@ -786,7 +843,6 @@
         const name = input.value.trim();
 
         if (name !== "") {
-            markDirty();
             workerData.push({
                 name: name,
                 att: [0,0,0,0,0,0],
@@ -797,6 +853,7 @@
             saveNamesPermanently();
             renderTable();
             addModalInstance.hide();
+            saveCurrentSessionDraft();
         } else {
             input.focus();
         }
@@ -825,11 +882,11 @@
         const idx = parseInt(select.value);
 
         if (!isNaN(idx) && workerData[idx]) {
-            markDirty();
             workerData.splice(idx, 1);
             saveNamesPermanently();
             renderTable();
             deleteModalInstance.hide();
+            saveCurrentSessionDraft();
         }
     }
 
@@ -845,10 +902,6 @@
             let size = parseFloat(document.getElementById(`size_${d}`).value) || 0;
             let straight = parseFloat(document.getElementById(`str_${d}`).value) || 0;
             let labours = parseFloat(document.getElementById(`labour_${d}`).value) || 0;
-
-            if (size > 0 || straight > 0 || labours > 0) {
-                markDirty();
-            }
 
             dailyTotalTons[d] = size + straight;
             let totalAmt = Math.round((size * sizeRate) + (straight * straightRate));
@@ -936,10 +989,6 @@
             let adv = parseFloat(advInput ? advInput.value : 0) || 0;
             let pfAmt = (isPfActive && pfAmtInput) ? (parseFloat(pfAmtInput.value) || 0) : 0;
 
-            if (adv > 0 || pfAmt > 0) {
-                markDirty();
-            }
-
             worker.adv = adv;
             worker.pfAmt = pfAmtInput ? (parseFloat(pfAmtInput.value) || 0) : 0;
 
@@ -978,6 +1027,8 @@
         document.getElementById("footer_grand_bal").innerText = "₹ " + totalBalSum.toLocaleString('en-IN');
     }
 
+    // Initialize & Load Draft
+    loadSessionDraft();
     renderTable();
 </script>
 
