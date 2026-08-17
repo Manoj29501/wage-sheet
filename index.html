@@ -39,6 +39,21 @@
             padding: 10px 15px;
         }
 
+        /* Fixed Rate Badges - Pure Static Non-Editable Text */
+        .fixed-rate-box {
+            background: #ffffff;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 13px;
+            font-weight: 700;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: default;
+        }
+
         /* Mobile Responsive Horizontal Scroll Wrapper */
         .table-scroll-container {
             width: 100%;
@@ -386,15 +401,16 @@
                 <label for="globalPfToggle" class="small fw-bold mb-0" style="color: #6b21a8; cursor: pointer;">PF</label>
             </div>
 
-            <!-- Fixed Constant Badges for Size & Straight Rates -->
-            <div class="d-flex align-items-center bg-white px-2 py-1 border rounded shadow-sm">
-                <span class="small fw-bold text-muted me-1">Size Rate:</span>
-                <span class="badge bg-primary-subtle text-primary fw-bold" style="font-size: 12px;">₹87</span>
+            <!-- Absolute Fixed Static Display (NO INPUT ELEMENT) -->
+            <div class="fixed-rate-box shadow-sm">
+                <span class="text-muted">Size:</span>
+                <span class="text-primary fw-bold">₹87</span>
             </div>
-            <div class="d-flex align-items-center bg-white px-2 py-1 border rounded shadow-sm">
-                <span class="small fw-bold text-muted me-1">Straight Rate:</span>
-                <span class="badge bg-success-subtle text-success fw-bold" style="font-size: 12px;">₹77</span>
+            <div class="fixed-rate-box shadow-sm">
+                <span class="text-muted">Str:</span>
+                <span class="text-success fw-bold">₹77</span>
             </div>
+
             <button class="btn btn-dark btn-sm fw-bold shadow-sm" onclick="window.print()">🖨️ PDF</button>
         </div>
     </div>
@@ -555,10 +571,12 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     /* ==========================================================================
-       FIXED RATE CONSTANTS
+       IMMUTABLE READONLY CONSTANTS (CANNOT BE CHANGED BY SCRIPT OR USER)
        ========================================================================== */
-    const SIZE_RATE = 87;       // Constant Size Rate (₹87)
-    const STRAIGHT_RATE = 77;   // Constant Straight Rate (₹77)
+    const RATES = Object.freeze({
+        SIZE: 87,
+        STRAIGHT: 77
+    });
 
     /* ==========================================================================
        BULLETPROOF HARDWARE & GESTURE BACK TRAP FOR MOBILE BROWSERS
@@ -897,7 +915,8 @@
             let labours = parseFloat(document.getElementById(`labour_${d}`).value) || 0;
 
             dailyTotalTons[d] = size + straight;
-            let totalAmt = Math.round((size * SIZE_RATE) + (straight * STRAIGHT_RATE));
+            // Strict Constants Calculation (₹87 and ₹77)
+            let totalAmt = Math.round((size * RATES.SIZE) + (straight * RATES.STRAIGHT));
             document.getElementById(`tot_${d}`).innerText = totalAmt;
             sixDaysGrandTotal += totalAmt;
 
