@@ -386,13 +386,14 @@
                 <label for="globalPfToggle" class="small fw-bold mb-0" style="color: #6b21a8; cursor: pointer;">PF</label>
             </div>
 
+            <!-- Fixed Constant Badges for Size & Straight Rates -->
             <div class="d-flex align-items-center bg-white px-2 py-1 border rounded shadow-sm">
-                <span class="small fw-bold text-muted me-1">Size:</span>
-                <input type="number" id="cfgSizeRate" value="87" style="width: 42px;" class="form-control form-control-sm text-center fw-bold p-0 border-0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)">
+                <span class="small fw-bold text-muted me-1">Size Rate:</span>
+                <span class="badge bg-primary-subtle text-primary fw-bold" style="font-size: 12px;">₹87</span>
             </div>
             <div class="d-flex align-items-center bg-white px-2 py-1 border rounded shadow-sm">
-                <span class="small fw-bold text-muted me-1">Str:</span>
-                <input type="number" id="cfgStraightRate" value="77" style="width: 42px;" class="form-control form-control-sm text-center fw-bold p-0 border-0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)">
+                <span class="small fw-bold text-muted me-1">Straight Rate:</span>
+                <span class="badge bg-success-subtle text-success fw-bold" style="font-size: 12px;">₹77</span>
             </div>
             <button class="btn btn-dark btn-sm fw-bold shadow-sm" onclick="window.print()">🖨️ PDF</button>
         </div>
@@ -554,42 +555,41 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     /* ==========================================================================
+       FIXED RATE CONSTANTS
+       ========================================================================== */
+    const SIZE_RATE = 87;       // Constant Size Rate (₹87)
+    const STRAIGHT_RATE = 77;   // Constant Straight Rate (₹77)
+
+    /* ==========================================================================
        BULLETPROOF HARDWARE & GESTURE BACK TRAP FOR MOBILE BROWSERS
        ========================================================================== */
-
     let isBackTrapActive = false;
 
     function primeHistoryStack() {
         if (!isBackTrapActive) {
             isBackTrapActive = true;
-            // Push 10 identical states so swipe/back cannot escape in a single pop
             for (let i = 0; i < 10; i++) {
                 window.history.pushState({ trapLevel: i }, document.title, window.location.href);
             }
         }
     }
 
-    // Prime the stack immediately and also upon the very first user interaction
     window.addEventListener('load', primeHistoryStack);
     document.addEventListener('touchstart', primeHistoryStack, { once: true, passive: true });
     document.addEventListener('click', primeHistoryStack, { once: true, passive: true });
 
-    // Listen for Back Button / Swipe-back triggers
     window.addEventListener('popstate', function (e) {
         const wantToExit = window.confirm("⚠️ எச்சரிக்கை!\n\nபக்கத்தை விட்டு வெளியேறினால் நீங்கள் உள்ளிட்ட கணக்கு விவரங்கள் அழியக்கூடும்.\n\nவெளியேற விரும்புகிறீர்களா?");
         if (wantToExit) {
-            // User confirmed exit: unwind history
             window.removeEventListener('beforeunload', beforeUnloadHandler);
             window.history.go(-20);
         } else {
-            // User cancelled: refill history stack immediately
             for (let i = 0; i < 5; i++) {
                 window.history.pushState({ trapLevel: i }, document.title, window.location.href);
             }
         }
     });
 
-    // Desktop Tab Close / Reload Guard
     function beforeUnloadHandler(e) {
         e.preventDefault();
         e.returnValue = "கணக்கு விவரங்கள் அழியக்கூடும்! பக்கத்தை விட்டு வெளியேறவா?";
@@ -600,14 +600,11 @@
     /* ==========================================================================
        AUTO-SAVE & RECOVERY DRAFT ENGINE
        ========================================================================== */
-
     function saveCurrentSessionDraft() {
         syncCurrentState();
         const draft = {
             workerData: workerData,
             isPfActive: isPfActive,
-            cfgSizeRate: document.getElementById("cfgSizeRate").value,
-            cfgStraightRate: document.getElementById("cfgStraightRate").value,
             sizes: [0,1,2,3,4,5].map(d => document.getElementById(`size_${d}`).value),
             strs: [0,1,2,3,4,5].map(d => document.getElementById(`str_${d}`).value),
             labours: [0,1,2,3,4,5].map(d => document.getElementById(`labour_${d}`).value),
@@ -629,8 +626,6 @@
                     if (isPfActive) table.classList.add("pf-active");
                     else table.classList.remove("pf-active");
                 }
-                if (draft.cfgSizeRate) document.getElementById("cfgSizeRate").value = draft.cfgSizeRate;
-                if (draft.cfgStraightRate) document.getElementById("cfgStraightRate").value = draft.cfgStraightRate;
                 if (draft.sizes) draft.sizes.forEach((v, i) => document.getElementById(`size_${i}`).value = v);
                 if (draft.strs) draft.strs.forEach((v, i) => document.getElementById(`str_${i}`).value = v);
                 if (draft.labours) draft.labours.forEach((v, i) => document.getElementById(`labour_${i}`).value = v);
@@ -891,8 +886,6 @@
     }
 
     function calcSheet() {
-        const sizeRate = parseFloat(document.getElementById("cfgSizeRate").value) || 87;
-        const straightRate = parseFloat(document.getElementById("cfgStraightRate").value) || 77;
         let dayWages = [0, 0, 0, 0, 0, 0];
         let dailyTotalTons = [0, 0, 0, 0, 0, 0];
         let checkedLaboursCount = [0, 0, 0, 0, 0, 0];
@@ -904,7 +897,7 @@
             let labours = parseFloat(document.getElementById(`labour_${d}`).value) || 0;
 
             dailyTotalTons[d] = size + straight;
-            let totalAmt = Math.round((size * sizeRate) + (straight * straightRate));
+            let totalAmt = Math.round((size * SIZE_RATE) + (straight * STRAIGHT_RATE));
             document.getElementById(`tot_${d}`).innerText = totalAmt;
             sixDaysGrandTotal += totalAmt;
 
