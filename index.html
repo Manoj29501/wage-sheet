@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="ta">
 <head>
     <meta charset="UTF-8">
@@ -568,10 +568,29 @@
     </div>
 </div>
 
+<!-- Modal for Exit Confirmation (Clean Erase & Exit) -->
+<div class="modal fade" id="exitConfirmModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title fw-bold">⚠️ வெளியேற விரும்புகிறீர்களா?</h5>
+            </div>
+            <div class="modal-body py-4 text-center">
+                <p class="fs-6 fw-bold mb-1 text-dark">பக்கத்தை விட்டு வெளியேறினால் உள்ளிட்ட கணக்கு விவரங்கள் அனைத்தும் அழிக்கப்படும்.</p>
+                <p class="small text-muted mb-0">நிச்சயமாக வெளியேற வேண்டுமா?</p>
+            </div>
+            <div class="modal-footer d-flex justify-content-center gap-3 bg-light">
+                <button type="button" class="btn btn-secondary fw-bold px-4" onclick="stayOnPage()">இல்லை</button>
+                <button type="button" class="btn btn-danger fw-bold px-4" onclick="cleanEraseAndExit()">ஆம்</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     /* ==========================================================================
-       IMMUTABLE READONLY CONSTANTS (CANNOT BE CHANGED BY SCRIPT OR USER)
+       IMMUTABLE READONLY CONSTANTS
        ========================================================================== */
     const RATES = Object.freeze({
         SIZE: 87,
@@ -579,39 +598,55 @@
     });
 
     /* ==========================================================================
-       BULLETPROOF HARDWARE & GESTURE BACK TRAP FOR MOBILE BROWSERS
+       MODAL-BASED EXIT & CLEAN ERASE LOGIC
        ========================================================================== */
-    let isBackTrapActive = false;
+    let exitModalInstance = null;
+    let isExiting = false;
 
-    function primeHistoryStack() {
-        if (!isBackTrapActive) {
-            isBackTrapActive = true;
-            for (let i = 0; i < 10; i++) {
-                window.history.pushState({ trapLevel: i }, document.title, window.location.href);
-            }
+    function setupBackTrap() {
+        window.history.pushState({ appPage: true }, "", window.location.href);
+    }
+    setupBackTrap();
+
+    window.addEventListener('popstate', function (e) {
+        if (isExiting) return;
+
+        if (!exitModalInstance) {
+            exitModalInstance = new bootstrap.Modal(document.getElementById('exitConfirmModal'));
+        }
+        exitModalInstance.show();
+    });
+
+    function stayOnPage() {
+        setupBackTrap();
+        if (exitModalInstance) {
+            exitModalInstance.hide();
         }
     }
 
-    window.addEventListener('load', primeHistoryStack);
-    document.addEventListener('touchstart', primeHistoryStack, { once: true, passive: true });
-    document.addEventListener('click', primeHistoryStack, { once: true, passive: true });
+    // Erases all current session drafts completely and safely exits
+    function cleanEraseAndExit() {
+        isExiting = true;
 
-    window.addEventListener('popstate', function (e) {
-        const wantToExit = window.confirm("⚠️ எச்சரிக்கை!\n\nபக்கத்தை விட்டு வெளியேறினால் நீங்கள் உள்ளிட்ட கணக்கு விவரங்கள் அழியக்கூடும்.\n\nவெளியேற விரும்புகிறீர்களா?");
-        if (wantToExit) {
-            window.removeEventListener('beforeunload', beforeUnloadHandler);
-            window.history.go(-20);
-        } else {
-            for (let i = 0; i < 5; i++) {
-                window.history.pushState({ trapLevel: i }, document.title, window.location.href);
-            }
+        // 1. Completely destroy saved weekly session draft
+        sessionStorage.removeItem('current_wage_session_draft');
+
+        // 2. Hide confirmation modal
+        if (exitModalInstance) {
+            exitModalInstance.hide();
         }
-    });
+
+        // 3. Clean exit to blank page or standard browser start
+        window.removeEventListener('beforeunload', beforeUnloadHandler);
+        window.location.href = "about:blank";
+    }
 
     function beforeUnloadHandler(e) {
-        e.preventDefault();
-        e.returnValue = "கணக்கு விவரங்கள் அழியக்கூடும்! பக்கத்தை விட்டு வெளியேறவா?";
-        return e.returnValue;
+        if (!isExiting) {
+            e.preventDefault();
+            e.returnValue = "கணக்கு விவரங்கள் அழியக்கூடும்! பக்கத்தை விட்டு வெளியேறவா?";
+            return e.returnValue;
+        }
     }
     window.addEventListener("beforeunload", beforeUnloadHandler);
 
@@ -619,6 +654,7 @@
        AUTO-SAVE & RECOVERY DRAFT ENGINE
        ========================================================================== */
     function saveCurrentSessionDraft() {
+        if (isExiting) return;
         syncCurrentState();
         const draft = {
             workerData: workerData,
@@ -915,7 +951,6 @@
             let labours = parseFloat(document.getElementById(`labour_${d}`).value) || 0;
 
             dailyTotalTons[d] = size + straight;
-            // Strict Constants Calculation (₹87 and ₹77)
             let totalAmt = Math.round((size * RATES.SIZE) + (straight * RATES.STRAIGHT));
             document.getElementById(`tot_${d}`).innerText = totalAmt;
             sixDaysGrandTotal += totalAmt;
