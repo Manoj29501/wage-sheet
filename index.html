@@ -2,7 +2,7 @@
 <html lang="ta">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Contract Labour Wage Sheet</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -20,7 +20,7 @@
         body {
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             font-family: 'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif;
-            padding: 20px;
+            padding: 12px;
             color: #1e293b;
         }
 
@@ -28,8 +28,8 @@
             background: #ffffff;
             border: 2px solid var(--border-color);
             border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            padding: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
         }
 
         .top-bar-card {
@@ -39,23 +39,49 @@
             padding: 10px 15px;
         }
 
+        /* Mobile Responsive Horizontal Scroll Wrapper */
+        .table-scroll-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+        }
+
         /* 100% Solid Grid Table */
         table#mainWageTable {
-            border-collapse: collapse !important;
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
             width: 100% !important;
-            border: 2px solid var(--border-color) !important;
+            border-top: 1.5px solid var(--border-color) !important;
+            border-left: 1.5px solid var(--border-color) !important;
             background-color: #ffffff;
         }
 
         table#mainWageTable th,
         table#mainWageTable td {
-            border: 1.5px solid var(--border-color) !important;
-            padding: 7px 6px !important;
+            border-right: 1.5px solid var(--border-color) !important;
+            border-bottom: 1.5px solid var(--border-color) !important;
+            border-top: 0 !important;
+            border-left: 0 !important;
+            padding: 6px 5px !important;
             text-align: center !important;
             vertical-align: middle !important;
             font-size: 13px !important;
-            position: static !important;
             box-shadow: none !important;
+            background-color: #ffffff;
+        }
+
+        /* STICKY COLUMN: Freeze Name Column on Mobile Scroll */
+        .sticky-col {
+            position: sticky !important;
+            left: 0 !important;
+            z-index: 10 !important;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1) !important;
+        }
+        .names-date-header .sticky-col {
+            z-index: 15 !important;
+            background: #1e293b !important;
+            color: #ffffff !important;
         }
 
         /* Remove Up/Down Spinner Arrows */
@@ -75,7 +101,7 @@
             font-weight: 700 !important;
             text-align: left !important;
             padding-left: 10px !important;
-            min-width: 145px;
+            min-width: 130px;
             color: #334155;
         }
         .hdr-input {
@@ -105,7 +131,7 @@
             background-color: #fde047 !important;
             font-weight: 800 !important;
             color: #713f12 !important;
-            font-size: 15px !important;
+            font-size: 14px !important;
             letter-spacing: 0.3px;
         }
 
@@ -118,6 +144,8 @@
         .names-date-header td {
             border-color: #1e293b !important;
             padding: 8px 4px !important;
+            background: #1e293b !important;
+            color: #ffffff !important;
         }
 
         .date-picker-input {
@@ -148,19 +176,21 @@
         .drag-handle:active { cursor: grabbing; }
 
         .worker-name-cell {
-            background-color: #fbfbfc !important;
+            background-color: #f8fafc !important;
             text-align: left !important;
             padding-left: 8px !important;
             white-space: nowrap;
+            min-width: 130px;
+            max-width: 140px;
         }
         .worker-name-input {
-            width: 82%;
+            width: 78%;
             border: 1px solid transparent;
             background: transparent;
             font-weight: 700;
             color: #0f172a;
             font-size: 13px;
-            padding: 3px 6px;
+            padding: 3px 4px;
             outline: none;
             border-radius: 6px;
             transition: all 0.2s;
@@ -171,12 +201,11 @@
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
         }
 
-        .worker-row:hover { background-color: #f8fafc !important; }
-        .worker-row.dragging { opacity: 0.4; background-color: #e0f2fe; }
-        .worker-row.drag-over { border-top: 3px solid #2563eb !important; }
+        .worker-row:hover td { background-color: #f0fdf4 !important; }
+        .worker-row.dragging { opacity: 0.4; }
 
         /* Day Cells */
-        .day-cell { min-width: 90px; }
+        .day-cell { min-width: 85px; background-color: #ffffff; }
         .day-cell.active-full {
             background-color: #ecfdf5 !important;
             font-weight: 700;
@@ -189,12 +218,12 @@
         }
         .day-cell.cell-locked {
             opacity: 0.55;
-            background-color: #f8fafc;
+            background-color: #f8fafc !important;
         }
 
         .chk-mini {
-            width: 17px;
-            height: 17px;
+            width: 18px;
+            height: 18px;
             cursor: pointer;
             vertical-align: middle;
             accent-color: #2563eb;
@@ -210,7 +239,7 @@
             cursor: pointer;
             color: #475569;
             font-weight: 700;
-            margin-left: 3px;
+            margin-left: 2px;
         }
         .btn-ton-deduct:hover { background: #cbd5e1; }
         .ton-tag { font-size: 10px; color: #ea580c; display: block; font-weight: 700; }
@@ -220,9 +249,9 @@
             font-weight: 800 !important;
             background-color: #eff6ff !important;
             color: #1e40af !important;
-            width: 90px;
+            min-width: 85px;
         }
-        .col-adv { width: 85px; }
+        .col-adv { min-width: 80px; }
         .col-adv input {
             width: 100%;
             border: 1.5px solid #fecaca;
@@ -235,11 +264,10 @@
             padding: 2px 0;
             outline: none;
         }
-        .col-adv input:focus { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15); }
 
         .pf-column-cell { display: none; }
         .pf-active .pf-column-cell { display: table-cell !important; }
-        .col-pf { width: 85px; background-color: #faf5ff !important; }
+        .col-pf { min-width: 80px; background-color: #faf5ff !important; }
         .col-pf input {
             width: 100%;
             border: 1.5px solid #e9d5ff;
@@ -252,18 +280,17 @@
             padding: 2px 0;
             outline: none;
         }
-        .col-pf input:focus { border-color: #7e22ce; box-shadow: 0 0 0 3px rgba(126, 34, 206, 0.15); }
 
         .col-bal {
             font-weight: 800 !important;
             background-color: #f0fdf4 !important;
             color: #15803d !important;
             font-size: 14px !important;
-            width: 90px;
+            min-width: 85px;
         }
 
         /* Footer Rows */
-        .footer-count-row {
+        .footer-count-row td {
             background-color: #f1f5f9 !important;
             font-weight: 700 !important;
             color: #334155;
@@ -279,12 +306,11 @@
             font-weight: 800 !important;
         }
 
-        .footer-total-row {
+        .footer-total-row td {
             background-color: #0f172a !important;
             color: #ffffff !important;
             font-weight: 800 !important;
         }
-        .footer-total-row td { border-color: #334155 !important; }
         .footer-gross { background-color: #1e3a8a !important; color: #bfdbfe !important; font-size: 14px; }
         .footer-adv { background-color: #7f1d1d !important; color: #fecaca !important; font-size: 14px; }
         .footer-pf { background-color: #581c87 !important; color: #e9d5ff !important; font-size: 14px; }
@@ -306,27 +332,25 @@
             .no-print { display: none !important; }
             .drag-handle { display: none !important; }
             .btn-ton-deduct { display: none !important; }
+            .sticky-col { position: static !important; box-shadow: none !important; }
 
-            table#mainWageTable,
-            table#mainWageTable tr,
+            table#mainWageTable {
+                border-top: 1.5px solid #000000 !important;
+                border-left: 1.5px solid #000000 !important;
+            }
             table#mainWageTable th,
             table#mainWageTable td {
-                border: 1.5px solid #000000 !important;
-                border-collapse: collapse !important;
-                position: static !important;
+                border-right: 1.5px solid #000000 !important;
+                border-bottom: 1.5px solid #000000 !important;
+                padding: 4px 2px !important;
+                font-size: 11px !important;
             }
 
             tfoot {
                 display: table-row-group !important;
             }
-
             tr {
                 page-break-inside: avoid !important;
-            }
-
-            th, td {
-                padding: 4px 2px !important;
-                font-size: 11px !important;
             }
 
             .hdr-input, .worker-name-input, .col-adv input, .col-pf input {
@@ -348,38 +372,39 @@
 <body>
 
 <div class="sheet-container">
-    <div class="d-flex justify-content-between align-items-center mb-3 no-print top-bar-card">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 no-print top-bar-card gap-2">
         <div class="d-flex align-items-center gap-2">
             <span style="font-size: 20px;">📘</span>
-            <h5 class="fw-bold mb-0 text-dark">வாராந்திர லேபர் கூலி கணக்கு ஏடு</h5>
+            <h6 class="fw-bold mb-0 text-dark">வாராந்திர லேபர் கூலி கணக்கு ஏடு</h6>
         </div>
-        <div class="d-flex align-items-center gap-2">
-            <button class="btn btn-primary btn-sm fw-bold px-3 shadow-sm" onclick="openAddWorkerModal()">➕ புதிய தொழிலாளி சேர்க்க</button>
-            <button class="btn btn-outline-danger btn-sm fw-bold px-3 shadow-sm" onclick="openDeleteWorkerModal()">➖ தொழிலாளியை நீக்க</button>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <button class="btn btn-primary btn-sm fw-bold px-2 shadow-sm" onclick="openAddWorkerModal()">➕ சேர்க்க</button>
+            <button class="btn btn-outline-danger btn-sm fw-bold px-2 shadow-sm" onclick="openDeleteWorkerModal()">➖ நீக்க</button>
 
             <div class="d-flex align-items-center px-2 py-1 border rounded shadow-sm" style="background-color: #f3e8ff; border-color: #d8b4fe !important;">
                 <input type="checkbox" id="globalPfToggle" class="form-check-input mt-0 me-1" onchange="toggleGlobalPf(this.checked)">
-                <label for="globalPfToggle" class="small fw-bold mb-0" style="color: #6b21a8; cursor: pointer;">PF காலம்</label>
+                <label for="globalPfToggle" class="small fw-bold mb-0" style="color: #6b21a8; cursor: pointer;">PF</label>
             </div>
 
             <div class="d-flex align-items-center bg-white px-2 py-1 border rounded shadow-sm">
-                <span class="small fw-bold text-muted me-1">Size Rate:</span>
-                <input type="number" id="cfgSizeRate" value="87" style="width: 46px;" class="form-control form-control-sm text-center fw-bold p-0 border-0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)">
+                <span class="small fw-bold text-muted me-1">Size:</span>
+                <input type="number" id="cfgSizeRate" value="87" style="width: 42px;" class="form-control form-control-sm text-center fw-bold p-0 border-0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)">
             </div>
             <div class="d-flex align-items-center bg-white px-2 py-1 border rounded shadow-sm">
-                <span class="small fw-bold text-muted me-1">Straight Rate:</span>
-                <input type="number" id="cfgStraightRate" value="77" style="width: 46px;" class="form-control form-control-sm text-center fw-bold p-0 border-0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)">
+                <span class="small fw-bold text-muted me-1">Str:</span>
+                <input type="number" id="cfgStraightRate" value="77" style="width: 42px;" class="form-control form-control-sm text-center fw-bold p-0 border-0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)">
             </div>
-            <button class="btn btn-dark btn-sm fw-bold shadow-sm" onclick="window.print()">🖨️ Print / PDF</button>
+            <button class="btn btn-dark btn-sm fw-bold shadow-sm" onclick="window.print()">🖨️ PDF</button>
         </div>
     </div>
 
-    <div>
+    <!-- Scrollable container for mobile -->
+    <div class="table-scroll-container">
         <table id="mainWageTable">
             <tbody>
             <!-- 1. Size Row -->
             <tr>
-                <td class="hdr-title">Size (Tons)</td>
+                <td class="hdr-title sticky-col">Size (Tons)</td>
                 <td><input type="number" id="size_0" class="hdr-input" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
                 <td><input type="number" id="size_1" class="hdr-input" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
                 <td><input type="number" id="size_2" class="hdr-input" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
@@ -393,7 +418,7 @@
 
             <!-- 2. Straight Row -->
             <tr>
-                <td class="hdr-title">Straight (Tons)</td>
+                <td class="hdr-title sticky-col">Straight (Tons)</td>
                 <td><input type="number" id="str_0" class="hdr-input" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
                 <td><input type="number" id="str_1" class="hdr-input" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
                 <td><input type="number" id="str_2" class="hdr-input" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
@@ -407,7 +432,7 @@
 
             <!-- 3. Total Row -->
             <tr>
-                <td class="hdr-title hdr-total">Total (₹)</td>
+                <td class="hdr-title hdr-total sticky-col">Total (₹)</td>
                 <td id="tot_0" class="hdr-total">0</td>
                 <td id="tot_1" class="hdr-total">0</td>
                 <td id="tot_2" class="hdr-total">0</td>
@@ -422,7 +447,7 @@
 
             <!-- 4. Labours Count Row -->
             <tr style="background-color: #f8fafc;">
-                <td class="hdr-title text-primary">Labours (ஆட்கள்)</td>
+                <td class="hdr-title text-primary sticky-col">Labours (ஆட்கள்)</td>
                 <td><input type="number" id="labour_0" class="hdr-input text-primary" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
                 <td><input type="number" id="labour_1" class="hdr-input text-primary" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
                 <td><input type="number" id="labour_2" class="hdr-input text-primary" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
@@ -436,7 +461,7 @@
 
             <!-- 5. Names & Date Header Row -->
             <tr class="names-date-header">
-                <td class="text-start ps-3">பெயர் \ தேதி</td>
+                <td class="text-start ps-3 sticky-col">பெயர் \ தேதி</td>
                 <td><input type="date" id="date_0" class="date-picker-input"></td>
                 <td><input type="date" id="date_1" class="date-picker-input"></td>
                 <td><input type="date" id="date_2" class="date-picker-input"></td>
@@ -456,21 +481,21 @@
             <!-- Footer -->
             <tfoot>
             <tr class="footer-count-row">
-                <td class="text-start ps-3 fw-bold">டிக் செய்த ஆட்கள் (Present Check)</td>
+                <td class="text-start ps-3 fw-bold sticky-col">டிக் செய்த ஆட்கள்</td>
                 <td id="count_0">0</td>
                 <td id="count_1">0</td>
                 <td id="count_2">0</td>
                 <td id="count_3">0</td>
                 <td id="count_4">0</td>
                 <td id="count_5">0</td>
-                <td colspan="2" class="text-muted small">- லேபர் சரிபார்ப்பு -</td>
+                <td colspan="2" class="text-muted small">- சரிபார்ப்பு -</td>
                 <td class="pf-column-cell text-muted small"></td>
                 <td class="text-muted small"></td>
             </tr>
 
             <tr class="footer-total-row">
-                <td class="text-start ps-3">மொத்தம் (Grand Total)</td>
-                <td colspan="6" class="small text-center text-light opacity-75" style="background-color: #1e293b;">- வாராந்திர மொத்தக் கணக்கு -</td>
+                <td class="text-start ps-3 sticky-col" style="background: #0f172a !important; color: #fff !important;">மொத்தம் (Total)</td>
+                <td colspan="6" class="small text-center text-light opacity-75" style="background-color: #1e293b !important;">- வாராந்திர மொத்தக் கணக்கு -</td>
                 <td id="footer_grand_gross" class="footer-gross">₹ 0</td>
                 <td id="footer_grand_adv" class="footer-adv">₹ 0</td>
                 <td id="footer_grand_pf" class="footer-pf pf-column-cell">₹ 0</td>
@@ -617,7 +642,7 @@
             tr.dataset.index = rIdx;
 
             tr.innerHTML = `
-                <td class="worker-name-cell">
+                <td class="worker-name-cell sticky-col">
                     <span class="drag-handle" title="Drag to Reorder">☰</span>
                     <input type="text" class="worker-name-input" value="${worker.name}" oninput="updateName(${rIdx}, this.value)" onfocus="this.select()" onkeydown="handleEnterKey(event, this)" placeholder="பெயர்...">
                 </td>
@@ -708,7 +733,6 @@
         saveNamesPermanently();
     }
 
-    // Modal-based Worker Addition
     function openAddWorkerModal() {
         syncCurrentState();
         const input = document.getElementById("newWorkerNameInput");
@@ -741,7 +765,6 @@
         }
     }
 
-    // Modal-based Worker Deletion
     function openDeleteWorkerModal() {
         syncCurrentState();
         const select = document.getElementById("workerSelectToDelete");
