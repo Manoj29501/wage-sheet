@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract Labour Wage Sheet</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #eff6ff;
+            --accent-yellow: #fef08a;
+            --accent-green: #dcfce7;
+            --accent-red: #fee2e2;
+            --accent-purple: #f3e8ff;
+            --border-color: #334155;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            font-family: 'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif;
+            padding: 20px;
+            color: #1e293b;
+        }
+
+        .sheet-container {
+            background: #ffffff;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        .top-bar-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 10px 15px;
+        }
+
+        /* 100% Solid Grid Table */
+        table#mainWageTable {
+            border-collapse: collapse !important;
+            width: 100% !important;
+            border: 2px solid var(--border-color) !important;
+            background-color: #ffffff;
+        }
+
+        table#mainWageTable th,
+        table#mainWageTable td {
+            border: 1.5px solid var(--border-color) !important;
+            padding: 7px 6px !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            font-size: 13px !important;
+            position: static !important;
+            box-shadow: none !important;
+        }
+
+        /* Remove Up/Down Spinner Arrows */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        /* Top Meta Rows */
+        .hdr-title {
+            background-color: #f1f5f9 !important;
+            font-weight: 700 !important;
+            text-align: left !important;
+            padding-left: 10px !important;
+            min-width: 145px;
+            color: #334155;
+        }
+        .hdr-input {
+            width: 100%;
+            border: 1px solid transparent;
+            background: transparent;
+            text-align: center;
+            font-weight: 700;
+            font-size: 13px;
+            outline: none;
+            border-radius: 6px;
+            padding: 2px;
+            transition: all 0.2s;
+        }
+        .hdr-input:focus {
+            border: 1.5px solid #2563eb;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .hdr-total {
+            background-color: #fef9c3 !important;
+            font-weight: 800 !important;
+            color: #854d0e !important;
+        }
+        .hdr-grand-total {
+            background-color: #fde047 !important;
+            font-weight: 800 !important;
+            color: #713f12 !important;
+            font-size: 15px !important;
+            letter-spacing: 0.3px;
+        }
+
+        /* Modern Slate Blue Header */
+        .names-date-header {
+            background: linear-gradient(90deg, #1e293b 0%, #334155 100%) !important;
+            color: #ffffff !important;
+            font-weight: 700;
+        }
+        .names-date-header td {
+            border-color: #1e293b !important;
+            padding: 8px 4px !important;
+        }
+
+        .date-picker-input {
+            width: 100%;
+            background-color: #0f172a;
+            color: #ffffff;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            padding: 4px 2px;
+            cursor: pointer;
+        }
+        .date-picker-input::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        /* Worker Rows */
+        .drag-handle {
+            cursor: grab;
+            color: #94a3b8;
+            padding-right: 6px;
+            user-select: none;
+            font-size: 14px;
+        }
+        .drag-handle:active { cursor: grabbing; }
+
+        .worker-name-cell {
+            background-color: #fbfbfc !important;
+            text-align: left !important;
+            padding-left: 8px !important;
+            white-space: nowrap;
+        }
+        .worker-name-input {
+            width: 82%;
+            border: 1px solid transparent;
+            background: transparent;
+            font-weight: 700;
+            color: #0f172a;
+            font-size: 13px;
+            padding: 3px 6px;
+            outline: none;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .worker-name-input:focus {
+            background-color: #ffffff;
+            border: 1.5px solid #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .worker-row:hover { background-color: #f8fafc !important; }
+        .worker-row.dragging { opacity: 0.4; background-color: #e0f2fe; }
+        .worker-row.drag-over { border-top: 3px solid #2563eb !important; }
+
+        /* Day Cells */
+        .day-cell { min-width: 90px; }
+        .day-cell.active-full {
+            background-color: #ecfdf5 !important;
+            font-weight: 700;
+            color: #065f46;
+        }
+        .day-cell.active-partial {
+            background-color: #fff7ed !important;
+            font-weight: 700;
+            color: #9a3412;
+        }
+        .day-cell.cell-locked {
+            opacity: 0.55;
+            background-color: #f8fafc;
+        }
+
+        .chk-mini {
+            width: 17px;
+            height: 17px;
+            cursor: pointer;
+            vertical-align: middle;
+            accent-color: #2563eb;
+        }
+        .chk-mini:disabled { cursor: not-allowed; }
+
+        .btn-ton-deduct {
+            font-size: 9px;
+            padding: 1px 4px;
+            background: #e2e8f0;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #475569;
+            font-weight: 700;
+            margin-left: 3px;
+        }
+        .btn-ton-deduct:hover { background: #cbd5e1; }
+        .ton-tag { font-size: 10px; color: #ea580c; display: block; font-weight: 700; }
+
+        /* Calculation Columns */
+        .col-gross {
+            font-weight: 800 !important;
+            background-color: #eff6ff !important;
+            color: #1e40af !important;
+            width: 90px;
+        }
+        .col-adv { width: 85px; }
+        .col-adv input {
+            width: 100%;
+            border: 1.5px solid #fecaca;
+            background-color: #fffafb;
+            text-align: center;
+            font-weight: 700;
+            color: #dc2626;
+            border-radius: 6px;
+            font-size: 13px;
+            padding: 2px 0;
+            outline: none;
+        }
+        .col-adv input:focus { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15); }
+
+        .pf-column-cell { display: none; }
+        .pf-active .pf-column-cell { display: table-cell !important; }
+        .col-pf { width: 85px; background-color: #faf5ff !important; }
+        .col-pf input {
+            width: 100%;
+            border: 1.5px solid #e9d5ff;
+            background-color: #fdf4ff;
+            text-align: center;
+            font-weight: 700;
+            color: #7e22ce;
+            border-radius: 6px;
+            font-size: 13px;
+            padding: 2px 0;
+            outline: none;
+        }
+        .col-pf input:focus { border-color: #7e22ce; box-shadow: 0 0 0 3px rgba(126, 34, 206, 0.15); }
+
+        .col-bal {
+            font-weight: 800 !important;
+            background-color: #f0fdf4 !important;
+            color: #15803d !important;
+            font-size: 14px !important;
+            width: 90px;
+        }
+
+        /* Footer Rows */
+        .footer-count-row {
+            background-color: #f1f5f9 !important;
+            font-weight: 700 !important;
+            color: #334155;
+        }
+        .count-matched {
+            background-color: #dcfce7 !important;
+            color: #15803d !important;
+            font-weight: 800 !important;
+        }
+        .count-mismatch {
+            background-color: #fee2e2 !important;
+            color: #b91c1c !important;
+            font-weight: 800 !important;
+        }
+
+        .footer-total-row {
+            background-color: #0f172a !important;
+            color: #ffffff !important;
+            font-weight: 800 !important;
+        }
+        .footer-total-row td { border-color: #334155 !important; }
+        .footer-gross { background-color: #1e3a8a !important; color: #bfdbfe !important; font-size: 14px; }
+        .footer-adv { background-color: #7f1d1d !important; color: #fecaca !important; font-size: 14px; }
+        .footer-pf { background-color: #581c87 !important; color: #e9d5ff !important; font-size: 14px; }
+        .footer-bal { background-color: #14532d !important; color: #86efac !important; font-size: 15px; }
+
+        /* Print Engine Styles */
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                box-shadow: none !important;
+            }
+            @page {
+                size: A4 landscape;
+                margin: 6mm 8mm;
+            }
+            body { background: #ffffff !important; padding: 0 !important; font-size: 11px; }
+            .sheet-container { border: none !important; box-shadow: none !important; padding: 0 !important; width: 100% !important; }
+            .no-print { display: none !important; }
+            .drag-handle { display: none !important; }
+            .btn-ton-deduct { display: none !important; }
+
+            table#mainWageTable,
+            table#mainWageTable tr,
+            table#mainWageTable th,
+            table#mainWageTable td {
+                border: 1.5px solid #000000 !important;
+                border-collapse: collapse !important;
+                position: static !important;
+            }
+
+            tfoot {
+                display: table-row-group !important;
+            }
+
+            tr {
+                page-break-inside: avoid !important;
+            }
+
+            th, td {
+                padding: 4px 2px !important;
+                font-size: 11px !important;
+            }
+
+            .hdr-input, .worker-name-input, .col-adv input, .col-pf input {
+                border: none !important;
+                background: transparent !important;
+                font-size: 11px !important;
+            }
+
+            .date-picker-input {
+                background: transparent !important;
+                color: #000000 !important;
+                border: none !important;
+                font-size: 10px !important;
+                padding: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sheet-container">
+    <div class="d-flex justify-content-between align-items-center mb-3 no-print top-bar-card">
+        <div class="d-flex align-items-center gap-2">
+            <span style="font-size: 20px;">📘</span>
+            <h5 class="fw-bold mb-0 text-dark">வாராந்திர லேபர் கூலி கணக்கு ஏடு</h5>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-primary btn-sm fw-bold px-3 shadow-sm" onclick="openAddWorkerModal()">➕ புதிய தொழிலாளி சேர்க்க</button>
+            <button class="btn btn-outline-danger btn-sm fw-bold px-3 shadow-sm" onclick="openDeleteWorkerModal()">➖ தொழிலாளியை நீக்க</button>
+
+            <div class="d-flex align-items-center px-2 py-1 border rounded shadow-sm" style="background-color: #f3e8ff; border-color: #d8b4fe !important;">
+                <input type="checkbox" id="globalPfToggle" class="form-check-input mt-0 me-1" onchange="toggleGlobalPf(this.checked)">
+                <label for="globalPfToggle" class="small fw-bold mb-0" style="color: #6b21a8; cursor: pointer;">PF காலம்</label>
+            </div>
+
+            <div class="d-flex align-items-center bg-white px-2 py-1 border rounded shadow-sm">
+                <span class="small fw-bold text-muted me-1">Size Rate:</span>
+                <input type="number" id="cfgSizeRate" value="87" style="width: 46px;" class="form-control form-control-sm text-center fw-bold p-0 border-0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)">
+            </div>
+            <div class="d-flex align-items-center bg-white px-2 py-1 border rounded shadow-sm">
+                <span class="small fw-bold text-muted me-1">Straight Rate:</span>
+                <input type="number" id="cfgStraightRate" value="77" style="width: 46px;" class="form-control form-control-sm text-center fw-bold p-0 border-0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)">
+            </div>
+            <button class="btn btn-dark btn-sm fw-bold shadow-sm" onclick="window.print()">🖨️ Print / PDF</button>
+        </div>
+    </div>
+
+    <div>
+        <table id="mainWageTable">
+            <tbody>
+            <!-- 1. Size Row -->
+            <tr>
+                <td class="hdr-title">Size (Tons)</td>
+                <td><input type="number" id="size_0" class="hdr-input" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+                <td><input type="number" id="size_1" class="hdr-input" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+                <td><input type="number" id="size_2" class="hdr-input" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+                <td><input type="number" id="size_3" class="hdr-input" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+                <td><input type="number" id="size_4" class="hdr-input" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+                <td><input type="number" id="size_5" class="hdr-input" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+                <td colspan="2" class="bg-light"></td>
+                <td class="pf-column-cell bg-light"></td>
+                <td class="bg-light"></td>
+            </tr>
+
+            <!-- 2. Straight Row -->
+            <tr>
+                <td class="hdr-title">Straight (Tons)</td>
+                <td><input type="number" id="str_0" class="hdr-input" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+                <td><input type="number" id="str_1" class="hdr-input" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+                <td><input type="number" id="str_2" class="hdr-input" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+                <td><input type="number" id="str_3" class="hdr-input" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+                <td><input type="number" id="str_4" class="hdr-input" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+                <td><input type="number" id="str_5" class="hdr-input" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+                <td colspan="2" class="bg-light"></td>
+                <td class="pf-column-cell bg-light"></td>
+                <td class="bg-light"></td>
+            </tr>
+
+            <!-- 3. Total Row -->
+            <tr>
+                <td class="hdr-title hdr-total">Total (₹)</td>
+                <td id="tot_0" class="hdr-total">0</td>
+                <td id="tot_1" class="hdr-total">0</td>
+                <td id="tot_2" class="hdr-total">0</td>
+                <td id="tot_3" class="hdr-total">0</td>
+                <td id="tot_4" class="hdr-total">0</td>
+                <td id="tot_5" class="hdr-total">0</td>
+                <td id="all_days_total" class="hdr-grand-total" title="6 நாட்களின் மொத்தத் தொகை">₹ 0</td>
+                <td class="hdr-total"></td>
+                <td class="pf-column-cell hdr-total"></td>
+                <td class="hdr-total"></td>
+            </tr>
+
+            <!-- 4. Labours Count Row -->
+            <tr style="background-color: #f8fafc;">
+                <td class="hdr-title text-primary">Labours (ஆட்கள்)</td>
+                <td><input type="number" id="labour_0" class="hdr-input text-primary" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+                <td><input type="number" id="labour_1" class="hdr-input text-primary" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+                <td><input type="number" id="labour_2" class="hdr-input text-primary" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+                <td><input type="number" id="labour_3" class="hdr-input text-primary" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+                <td><input type="number" id="labour_4" class="hdr-input text-primary" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+                <td><input type="number" id="labour_5" class="hdr-input text-primary" value="0" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+                <td colspan="2" class="bg-light"></td>
+                <td class="pf-column-cell bg-light"></td>
+                <td class="bg-light"></td>
+            </tr>
+
+            <!-- 5. Names & Date Header Row -->
+            <tr class="names-date-header">
+                <td class="text-start ps-3">பெயர் \ தேதி</td>
+                <td><input type="date" id="date_0" class="date-picker-input"></td>
+                <td><input type="date" id="date_1" class="date-picker-input"></td>
+                <td><input type="date" id="date_2" class="date-picker-input"></td>
+                <td><input type="date" id="date_3" class="date-picker-input"></td>
+                <td><input type="date" id="date_4" class="date-picker-input"></td>
+                <td><input type="date" id="date_5" class="date-picker-input"></td>
+                <td style="color: #93c5fd;">வார சம்பளம்</td>
+                <td style="color: #fca5a5;">அட்வான்ஸ்</td>
+                <td class="pf-column-cell" style="color: #e9d5ff;">PF பிடித்தம்</td>
+                <td style="color: #86efac;">பேலன்ஸ்</td>
+            </tr>
+            </tbody>
+
+            <!-- Worker Rows Body -->
+            <tbody id="workerTableBody"></tbody>
+
+            <!-- Footer -->
+            <tfoot>
+            <tr class="footer-count-row">
+                <td class="text-start ps-3 fw-bold">டிக் செய்த ஆட்கள் (Present Check)</td>
+                <td id="count_0">0</td>
+                <td id="count_1">0</td>
+                <td id="count_2">0</td>
+                <td id="count_3">0</td>
+                <td id="count_4">0</td>
+                <td id="count_5">0</td>
+                <td colspan="2" class="text-muted small">- லேபர் சரிபார்ப்பு -</td>
+                <td class="pf-column-cell text-muted small"></td>
+                <td class="text-muted small"></td>
+            </tr>
+
+            <tr class="footer-total-row">
+                <td class="text-start ps-3">மொத்தம் (Grand Total)</td>
+                <td colspan="6" class="small text-center text-light opacity-75" style="background-color: #1e293b;">- வாராந்திர மொத்தக் கணக்கு -</td>
+                <td id="footer_grand_gross" class="footer-gross">₹ 0</td>
+                <td id="footer_grand_adv" class="footer-adv">₹ 0</td>
+                <td id="footer_grand_pf" class="footer-pf pf-column-cell">₹ 0</td>
+                <td id="footer_grand_bal" class="footer-bal">₹ 0</td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<!-- Modal for Adding New Worker -->
+<div class="modal fade" id="addWorkerModal" tabindex="-1" aria-labelledby="addWorkerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold" id="addWorkerModalLabel">➕ புதிய தொழிலாளி சேர்த்தல்</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                <label for="newWorkerNameInput" class="form-label fw-bold text-dark">தொழிலாளியின் பெயரை உள்ளிடவும்:</label>
+                <input type="text" class="form-control form-control-lg" id="newWorkerNameInput" placeholder="எ.கா: சுரேஷ்" onkeydown="handleAddModalEnterKey(event)">
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">ரத்து செய்</button>
+                <button type="button" class="btn btn-primary fw-bold px-4" onclick="confirmAddWorker()">சேர்க்க</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Deleting Worker -->
+<div class="modal fade" id="deleteWorkerModal" tabindex="-1" aria-labelledby="deleteWorkerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold" id="deleteWorkerModalLabel">🗑️ தொழிலாளியை நீக்குதல்</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                <label for="workerSelectToDelete" class="form-label fw-bold text-dark">நீக்க வேண்டிய தொழிலாளரின் பெயரைத் தேர்ந்தெடுக்கவும்:</label>
+                <select class="form-select form-select-lg" id="workerSelectToDelete">
+                    <!-- Dynamic Options -->
+                </select>
+                <div class="alert alert-warning mt-3 mb-0 small">
+                    ⚠️ <strong>குறிப்பு:</strong> நீக்கிய பிறகு இவரின் பெயர் மற்றும் பதிவுகள் பட்டியலிலிருந்து நிரந்தரமாக அகற்றப்படும்.
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">ரத்து செய்</button>
+                <button type="button" class="btn btn-danger fw-bold px-4" onclick="confirmDeleteWorker()">நிரந்தரமாக நீக்கு</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function handleEnterKey(event, element) {
+        if (event.key === "Enter") {
+            element.blur();
+        }
+    }
+
+    function handleAddModalEnterKey(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            confirmAddWorker();
+        }
+    }
+
+    const defaultWorkerNames = [
+        "சேகர்", "கோபி", "சீனு", "சீமா", "பாபு", "சூரஜ்", "மாரி", "லட்சுமிபதி",
+        "வேலு", "முத்து", "கயா", "சிரஞ்சீவி", "லோகநாதன்", "மாணிக்கம்", "ரவி",
+        "லல்லு", "கைலாஷ்", "சமீர்", "ராகுல்", "காங்கிரஸ்", "விஜயன்", "ராமவிலாஸ்",
+        "மனோஜ்", "சங்கர்", "உதய்", "மிதுன்", "நரேஷ்", "ஈஸ்வரன்", "சுபாஷ்",
+        "ஹரி", "முனி", "முகேஷ் சிங்", "சந்துன்", "ராஜ்கிஷோர்", "முனுகுமார்",
+        "அனோஜ்", "பப்பு", "முகேஷ் குமார்", "சந்துன் (2)", "ரவிசங்கர்", "ராமு",
+        "யு பிரதீப்", "தீபக்", "பரத் குமார்"
+    ];
+
+    const savedNames = JSON.parse(localStorage.getItem('permanent_worker_names_only')) || defaultWorkerNames;
+
+    let workerData = savedNames.map(name => ({
+        name: name,
+        att: [0, 0, 0, 0, 0, 0],
+        deductTons: [0, 0, 0, 0, 0, 0],
+        adv: 0,
+        pfAmt: 0
+    }));
+
+    let isPfActive = false;
+    let draggedRowIndex = null;
+    let addModalInstance = null;
+    let deleteModalInstance = null;
+
+    function saveNamesPermanently() {
+        const namesOnly = workerData.map(w => w.name);
+        localStorage.setItem('permanent_worker_names_only', JSON.stringify(namesOnly));
+    }
+
+    function toggleGlobalPf(enabled) {
+        isPfActive = enabled;
+        const table = document.getElementById("mainWageTable");
+        if (isPfActive) {
+            table.classList.add("pf-active");
+        } else {
+            table.classList.remove("pf-active");
+            workerData.forEach((worker, rIdx) => {
+                worker.pfAmt = 0;
+                const pfInput = document.getElementById(`pf_amt_${rIdx}`);
+                if (pfInput) pfInput.value = 0;
+            });
+        }
+        calcSheet();
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById("workerTableBody");
+        tbody.innerHTML = "";
+
+        workerData.forEach((worker, rIdx) => {
+            if (!worker.deductTons) worker.deductTons = [0,0,0,0,0,0];
+            if (!worker.att) worker.att = [0,0,0,0,0,0];
+
+            let dayCells = "";
+            for (let d = 0; d < 6; d++) {
+                const isChecked = worker.att[d] === 1 ? "checked" : "";
+                const dTon = worker.deductTons[d] || 0;
+                const tonTagHtml = dTon > 0 ? `<span class="ton-tag">(-${dTon}t)</span>` : "";
+
+                dayCells += `
+                    <td class="day-cell" id="cell_${rIdx}_${d}">
+                        <input type="checkbox" class="chk-mini" id="chk_${rIdx}_${d}" ${isChecked} onchange="handleCheckboxChange(${rIdx}, ${d})">
+                        <span id="amt_${rIdx}_${d}">-</span>
+                        ${tonTagHtml}
+                        <button class="btn-ton-deduct no-print" onclick="setDeductTon(${rIdx}, ${d})" title="டன்னில் கழிவு செய்ய">-t</button>
+                    </td>
+                `;
+            }
+
+            const tr = document.createElement("tr");
+            tr.className = "worker-row";
+            tr.draggable = true;
+            tr.dataset.index = rIdx;
+
+            tr.innerHTML = `
+                <td class="worker-name-cell">
+                    <span class="drag-handle" title="Drag to Reorder">☰</span>
+                    <input type="text" class="worker-name-input" value="${worker.name}" oninput="updateName(${rIdx}, this.value)" onfocus="this.select()" onkeydown="handleEnterKey(event, this)" placeholder="பெயர்...">
+                </td>
+                ${dayCells}
+                <td id="gross_${rIdx}" class="col-gross">-</td>
+                <td class="col-adv"><input type="number" id="adv_${rIdx}" value="${worker.adv || 0}" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)"></td>
+
+                <td class="col-pf pf-column-cell">
+                    <input type="number" id="pf_amt_${rIdx}" value="${worker.pfAmt || 0}" oninput="calcSheet()" onfocus="this.select()" onkeydown="handleEnterKey(event, this)">
+                </td>
+
+                <td id="bal_${rIdx}" class="col-bal">-</td>
+            `;
+
+            tr.addEventListener("dragstart", (e) => {
+                draggedRowIndex = rIdx;
+                tr.classList.add("dragging");
+                e.dataTransfer.effectAllowed = "move";
+            });
+
+            tr.addEventListener("dragend", () => {
+                tr.classList.remove("dragging");
+                document.querySelectorAll(".worker-row").forEach(r => r.classList.remove("drag-over"));
+            });
+
+            tr.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+                tr.classList.add("drag-over");
+            });
+
+            tr.addEventListener("dragleave", () => {
+                tr.classList.remove("drag-over");
+            });
+
+            tr.addEventListener("drop", (e) => {
+                e.preventDefault();
+                tr.classList.remove("drag-over");
+                const targetIndex = parseInt(tr.dataset.index);
+                if (draggedRowIndex !== null && draggedRowIndex !== targetIndex) {
+                    syncCurrentState();
+                    const movedItem = workerData.splice(draggedRowIndex, 1)[0];
+                    workerData.splice(targetIndex, 0, movedItem);
+                    saveNamesPermanently();
+                    renderTable();
+                }
+            });
+
+            tbody.appendChild(tr);
+        });
+
+        calcSheet();
+    }
+
+    function handleCheckboxChange(rIdx, d) {
+        calcSheet();
+    }
+
+    function setDeductTon(rIdx, dIdx) {
+        const current = workerData[rIdx].deductTons[dIdx] || 0;
+        const input = prompt(`${workerData[rIdx].name} அவர்களுக்கு Day ${dIdx+1}-ல் எத்தனை டன் கழிக்க வேண்டும்?`, current);
+        if (input !== null) {
+            workerData[rIdx].deductTons[dIdx] = parseFloat(input) || 0;
+            if (workerData[rIdx].deductTons[dIdx] > 0) {
+                const chk = document.getElementById(`chk_${rIdx}_${dIdx}`);
+                if (chk) chk.checked = true;
+            }
+            calcSheet();
+        }
+    }
+
+    function syncCurrentState() {
+        workerData.forEach((worker, rIdx) => {
+            for (let d = 0; d < 6; d++) {
+                const chk = document.getElementById(`chk_${rIdx}_${d}`);
+                worker.att[d] = chk && chk.checked ? 1 : 0;
+            }
+            const advInput = document.getElementById(`adv_${rIdx}`);
+            const pfAmtInput = document.getElementById(`pf_amt_${rIdx}`);
+
+            worker.adv = advInput ? (parseFloat(advInput.value) || 0) : 0;
+            worker.pfAmt = pfAmtInput ? (parseFloat(pfAmtInput.value) || 0) : 0;
+        });
+    }
+
+    function updateName(idx, newName) {
+        workerData[idx].name = newName;
+        saveNamesPermanently();
+    }
+
+    // Modal-based Worker Addition
+    function openAddWorkerModal() {
+        syncCurrentState();
+        const input = document.getElementById("newWorkerNameInput");
+        input.value = "";
+
+        if (!addModalInstance) {
+            addModalInstance = new bootstrap.Modal(document.getElementById('addWorkerModal'));
+        }
+        addModalInstance.show();
+        setTimeout(() => input.focus(), 500);
+    }
+
+    function confirmAddWorker() {
+        const input = document.getElementById("newWorkerNameInput");
+        const name = input.value.trim();
+
+        if (name !== "") {
+            workerData.push({
+                name: name,
+                att: [0,0,0,0,0,0],
+                deductTons: [0,0,0,0,0,0],
+                adv: 0,
+                pfAmt: 0
+            });
+            saveNamesPermanently();
+            renderTable();
+            addModalInstance.hide();
+        } else {
+            input.focus();
+        }
+    }
+
+    // Modal-based Worker Deletion
+    function openDeleteWorkerModal() {
+        syncCurrentState();
+        const select = document.getElementById("workerSelectToDelete");
+        select.innerHTML = "";
+
+        workerData.forEach((worker, idx) => {
+            const opt = document.createElement("option");
+            opt.value = idx;
+            opt.textContent = `${idx + 1}. ${worker.name}`;
+            select.appendChild(opt);
+        });
+
+        if (!deleteModalInstance) {
+            deleteModalInstance = new bootstrap.Modal(document.getElementById('deleteWorkerModal'));
+        }
+        deleteModalInstance.show();
+    }
+
+    function confirmDeleteWorker() {
+        const select = document.getElementById("workerSelectToDelete");
+        const idx = parseInt(select.value);
+
+        if (!isNaN(idx) && workerData[idx]) {
+            workerData.splice(idx, 1);
+            saveNamesPermanently();
+            renderTable();
+            deleteModalInstance.hide();
+        }
+    }
+
+    function calcSheet() {
+        const sizeRate = parseFloat(document.getElementById("cfgSizeRate").value) || 87;
+        const straightRate = parseFloat(document.getElementById("cfgStraightRate").value) || 77;
+        let dayWages = [0, 0, 0, 0, 0, 0];
+        let dailyTotalTons = [0, 0, 0, 0, 0, 0];
+        let checkedLaboursCount = [0, 0, 0, 0, 0, 0];
+        let sixDaysGrandTotal = 0;
+
+        for (let d = 0; d < 6; d++) {
+            let size = parseFloat(document.getElementById(`size_${d}`).value) || 0;
+            let straight = parseFloat(document.getElementById(`str_${d}`).value) || 0;
+            let labours = parseFloat(document.getElementById(`labour_${d}`).value) || 0;
+
+            dailyTotalTons[d] = size + straight;
+            let totalAmt = Math.round((size * sizeRate) + (straight * straightRate));
+            document.getElementById(`tot_${d}`).innerText = totalAmt;
+            sixDaysGrandTotal += totalAmt;
+
+            dayWages[d] = labours > 0 ? (totalAmt / labours) : 0;
+        }
+
+        document.getElementById("all_days_total").innerText = "₹ " + sixDaysGrandTotal.toLocaleString('en-IN');
+
+        for (let d = 0; d < 6; d++) {
+            let count = 0;
+            workerData.forEach((_, rIdx) => {
+                const chk = document.getElementById(`chk_${rIdx}_${d}`);
+                if (chk && chk.checked) count++;
+            });
+            checkedLaboursCount[d] = count;
+        }
+
+        for (let d = 0; d < 6; d++) {
+            let maxLabours = parseFloat(document.getElementById(`labour_${d}`).value) || 0;
+            let isMaxReached = checkedLaboursCount[d] >= maxLabours && maxLabours > 0;
+
+            workerData.forEach((_, rIdx) => {
+                const chk = document.getElementById(`chk_${rIdx}_${d}`);
+                const cell = document.getElementById(`cell_${rIdx}_${d}`);
+                if (chk && cell) {
+                    if (!chk.checked) {
+                        chk.disabled = isMaxReached;
+                        if (isMaxReached) {
+                            cell.classList.add("cell-locked");
+                        } else {
+                            cell.classList.remove("cell-locked");
+                        }
+                    } else {
+                        chk.disabled = false;
+                        cell.classList.remove("cell-locked");
+                    }
+                }
+            });
+        }
+
+        let totalGrossSum = 0;
+        let totalAdvSum = 0;
+        let totalPfSum = 0;
+        let totalBalSum = 0;
+
+        workerData.forEach((worker, rIdx) => {
+            let gross = 0;
+
+            for (let d = 0; d < 6; d++) {
+                const chk = document.getElementById(`chk_${rIdx}_${d}`);
+                const cell = document.getElementById(`cell_${rIdx}_${d}`);
+                const amtSpan = document.getElementById(`amt_${rIdx}_${d}`);
+                const deductTons = worker.deductTons ? (worker.deductTons[d] || 0) : 0;
+
+                cell.classList.remove("active-full", "active-partial");
+
+                if (chk && chk.checked) {
+                    let fullDayWage = dayWages[d];
+                    let actualWage = fullDayWage;
+
+                    if (deductTons > 0 && dailyTotalTons[d] > 0) {
+                        let workedTons = Math.max(0, dailyTotalTons[d] - deductTons);
+                        actualWage = Math.round(fullDayWage * (workedTons / dailyTotalTons[d]));
+                        cell.classList.add("active-partial");
+                    } else {
+                        actualWage = Math.round(fullDayWage);
+                        cell.classList.add("active-full");
+                    }
+
+                    amtSpan.innerText = actualWage > 0 ? actualWage : 0;
+                    gross += actualWage;
+                    worker.att[d] = 1;
+                } else {
+                    amtSpan.innerText = "-";
+                    worker.att[d] = 0;
+                }
+            }
+
+            let advInput = document.getElementById(`adv_${rIdx}`);
+            let pfAmtInput = document.getElementById(`pf_amt_${rIdx}`);
+
+            let adv = parseFloat(advInput ? advInput.value : 0) || 0;
+            let pfAmt = (isPfActive && pfAmtInput) ? (parseFloat(pfAmtInput.value) || 0) : 0;
+
+            worker.adv = adv;
+            worker.pfAmt = pfAmtInput ? (parseFloat(pfAmtInput.value) || 0) : 0;
+
+            let balance = gross - adv - (isPfActive ? pfAmt : 0);
+
+            document.getElementById(`gross_${rIdx}`).innerText = gross > 0 ? gross : "-";
+            document.getElementById(`bal_${rIdx}`).innerText = (gross > 0 || adv > 0 || (isPfActive && pfAmt > 0)) ? balance : "-";
+
+            totalGrossSum += gross;
+            totalAdvSum += adv;
+            totalPfSum += pfAmt;
+            totalBalSum += balance;
+        });
+
+        for (let d = 0; d < 6; d++) {
+            let expectedLabours = parseFloat(document.getElementById(`labour_${d}`).value) || 0;
+            let actualChecked = checkedLaboursCount[d];
+            const countCell = document.getElementById(`count_${d}`);
+
+            countCell.classList.remove("count-matched", "count-mismatch");
+
+            if (expectedLabours === 0) {
+                countCell.innerHTML = `0 பேர்`;
+            } else if (actualChecked === expectedLabours) {
+                countCell.classList.add("count-matched");
+                countCell.innerHTML = `${actualChecked} பேர் <br><small style="font-size:10px;">✓ முடிந்தது</small>`;
+            } else {
+                countCell.classList.add("count-mismatch");
+                countCell.innerHTML = `${actualChecked} / ${expectedLabours} <br><small style="font-size:10px;">தேவை: ${Math.max(0, expectedLabours - actualChecked)}</small>`;
+            }
+        }
+
+        document.getElementById("footer_grand_gross").innerText = "₹ " + totalGrossSum.toLocaleString('en-IN');
+        document.getElementById("footer_grand_adv").innerText = "₹ " + totalAdvSum.toLocaleString('en-IN');
+        document.getElementById("footer_grand_pf").innerText = "₹ " + totalPfSum.toLocaleString('en-IN');
+        document.getElementById("footer_grand_bal").innerText = "₹ " + totalBalSum.toLocaleString('en-IN');
+    }
+
+    renderTable();
+</script>
+
+</body>
+</html>
